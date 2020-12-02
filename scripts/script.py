@@ -24,13 +24,13 @@ if opt.train:
 		--fineSize 320 \
         --patchSize 32 \
 		--skip 1 \
-		--batchSize 32 \
-        --self_attention \
+		--batchSize 16 \
 		--use_norm 1 \
 		--use_wgan 0 \
         --use_ragan \
         --hybrid_loss \
         --times_residual \
+		--illumination \
 		--instance_norm 0 \
 		--vgg 1 \
         --vgg_choose relu5_1 \

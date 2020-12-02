@@ -73,6 +73,7 @@ class BaseOptions():
         self.parser.add_argument('--D_P_times2', action='store_true', help='loss_D_P *= 2')
         self.parser.add_argument('--patch_vgg', action='store_true', help='use vgg loss between each patch')
         self.parser.add_argument('--hybrid_loss', action='store_true', help='use lsgan and ragan separately')
+        # 参数中的action='store_true'意思为，当出现了这个参数时，则执行动作将其设为true，否则是false
         self.parser.add_argument('--self_attention', action='store_true', help='adding attention on the input of generator')
         self.parser.add_argument('--times_residual', action='store_true', help='output = input + residual*attention')
         self.parser.add_argument('--low_times', type=int, default=200, help='choose the number of crop for patch discriminator')
@@ -80,6 +81,8 @@ class BaseOptions():
         self.parser.add_argument('--norm_attention', action='store_true', help='normalize attention map')
         self.parser.add_argument('--vary', type=int, default=1, help='use light data augmentation')
         self.parser.add_argument('--lighten', action='store_true', help='normalize attention map')
+
+        self.parser.add_argument('--illumination', action='store_true', help='use illumination model to generate image')
         self.initialized = True
 
     def parse(self):

@@ -596,7 +596,7 @@ class Unet_resize_conv(nn.Module):
         super(Unet_resize_conv, self).__init__()
 
         self.opt = opt
-        self.skip = skip
+        self.skip = skip # script中的skip = 1
         p = 1
         # self.conv1_1 = nn.Conv2d(4, 32, 3, padding=p)
         if opt.self_attention:
@@ -731,8 +731,8 @@ class Unet_resize_conv(nn.Module):
             gray_3 = self.downsample_2(gray_2)
             gray_4 = self.downsample_3(gray_3)
             gray_5 = self.downsample_4(gray_4)
-        if self.opt.use_norm == 1:
-            if self.opt.self_attention:
+        if self.opt.use_norm == 1: # opt.use_norm == 1
+            if self.opt.self_attention: # self_attention = true 选择是否使用self_attention（灰度图与输入拼接）
                 x = self.bn1_1(self.LReLU1_1(self.conv1_1(torch.cat((input, gray), 1))))
                 # x = self.bn1_1(self.LReLU1_1(self.conv1_1(input)))
             else:
@@ -780,34 +780,40 @@ class Unet_resize_conv(nn.Module):
             x = self.bn9_1(self.LReLU9_1(self.conv9_1(up9)))
             conv9 = self.LReLU9_2(self.conv9_2(x))
 
-            latent = self.conv10(conv9)
+            latent = self.conv10(conv9) # latent是网络输出
 
-            if self.opt.times_residual:
-                latent = latent*gray
+            if self.opt.illumination:
+                output = input / (latent + 0.000001)
+                output = torch.clamp(output, 0, 1)
 
-            # output = self.depth_to_space(conv10, 2)
-            if self.opt.tanh:
-                latent = self.tanh(latent)
-            if self.skip:
-                if self.opt.linear_add:
-                    if self.opt.latent_threshold:
-                        latent = F.relu(latent)
-                    elif self.opt.latent_norm:
-                        latent = (latent - torch.min(latent))/(torch.max(latent)-torch.min(latent))
-                    input = (input - torch.min(input))/(torch.max(input) - torch.min(input))
-                    output = latent + input*self.opt.skip
-                    output = output*2 - 1
-                else:
-                    if self.opt.latent_threshold:
-                        latent = F.relu(latent)
-                    elif self.opt.latent_norm:
-                        latent = (latent - torch.min(latent))/(torch.max(latent)-torch.min(latent))
-                    output = latent + input*self.opt.skip
+
             else:
-                output = latent
+                if self.opt.times_residual:
+                    latent = latent*gray # 网络输出乘以灰度图
 
-            if self.opt.linear:
-                output = output/torch.max(torch.abs(output))
+                # output = self.depth_to_space(conv10, 2)
+                if self.opt.tanh: # tanh激活
+                    latent = self.tanh(latent)
+                if self.skip: # skip = true
+                    if self.opt.linear_add:
+                        if self.opt.latent_threshold:
+                            latent = F.relu(latent)
+                        elif self.opt.latent_norm:
+                            latent = (latent - torch.min(latent))/(torch.max(latent)-torch.min(latent))
+                        input = (input - torch.min(input))/(torch.max(input) - torch.min(input))
+                        output = latent + input*self.opt.skip
+                        output = output*2 - 1
+                    else: # linear_add = false
+                        if self.opt.latent_threshold: # latent_threshold = false
+                            latent = F.relu(latent)
+                        elif self.opt.latent_norm: # latent_norm = false
+                            latent = (latent - torch.min(latent))/(torch.max(latent)-torch.min(latent))
+                        output = latent + input*self.opt.skip # opt.skip = 1
+                else:
+                    output = latent
+
+                if self.opt.linear: # opt.linear = false
+                    output = output/torch.max(torch.abs(output))
             
                 
         elif self.opt.use_norm == 0:

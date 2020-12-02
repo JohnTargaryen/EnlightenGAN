@@ -116,9 +116,9 @@ class UnalignedDataset(BaseDataset):
                 idx = torch.LongTensor(idx)
                 A_img = A_img.index_select(1, idx)
                 B_img = B_img.index_select(1, idx)
-            if self.opt.vary == 1 and (not self.opt.no_flip) and random.random() < 0.5:
+            if self.opt.vary == 1 and (not self.opt.no_flip) and random.random() < 0.5: # data agumentation
                 times = random.randint(self.opt.low_times,self.opt.high_times)/100.
-                input_img = (A_img+1)/2./times
+                input_img = (A_img+1)/2./times # input_img is the agumented version of A_img
                 input_img = input_img*2-1
             else:
                 input_img = A_img

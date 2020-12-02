@@ -235,12 +235,12 @@ class SingleModel(BaseModel):
         self.real_B = Variable(self.input_B)
         self.real_A_gray = Variable(self.input_A_gray)
         self.real_img = Variable(self.input_img)
-        if self.opt.noise > 0:
+        if self.opt.noise > 0: # add noise
             self.noise = Variable(torch.cuda.FloatTensor(self.real_A.size()).normal_(mean=0, std=self.opt.noise/255.))
             self.real_A = self.real_A + self.noise
         if self.opt.input_linear:
             self.real_A = (self.real_A - torch.min(self.real_A))/(torch.max(self.real_A) - torch.min(self.real_A))
-        if self.opt.skip == 1:
+        if self.opt.skip == 1: # 输入图像以及灰度图送入netG_A进行图像生成推导，返回所生成的图像fake_B
             self.fake_B, self.latent_real_A = self.netG_A.forward(self.real_img, self.real_A_gray)
         else:
             self.fake_B = self.netG_A.forward(self.real_img, self.real_A_gray)
